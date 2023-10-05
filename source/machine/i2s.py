@@ -3,10 +3,9 @@ from . import u2if_const as report_const
 
 
 class I2S:
-
-    def __init__(self):
+    def __init__(self, serial_number_str=None):
         self._initialized = False
-        self._device = Device()
+        self._device = Device(serial_number_str=serial_number_str)
         self._initialized = False
         self._init()
 
@@ -30,7 +29,10 @@ class I2S:
         self._initialized = False
 
     def set_freq(self, frequency):
-        res = self._device.send_report(bytes([report_const.I2S_SET_FREQ]) + frequency.to_bytes(4, byteorder='little'))
+        res = self._device.send_report(
+            bytes([report_const.I2S_SET_FREQ])
+            + frequency.to_bytes(4, byteorder='little')
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("I2S set freq error.")
         return True
@@ -38,7 +40,10 @@ class I2S:
     def write(self, buffer):
         self._device.reset_output_serial()
         remain_bytes = len(buffer)
-        res = self._device.send_report(bytes([report_const.I2S_WRITE_BUFFER]) + remain_bytes.to_bytes(4, byteorder='little'))
+        res = self._device.send_report(
+            bytes([report_const.I2S_WRITE_BUFFER])
+            + remain_bytes.to_bytes(4, byteorder='little')
+        )
         if res[1] != report_const.OK and res[2] == 0x01:
             raise RuntimeError("I2S write error : too many bytes")
         elif res[1] != report_const.OK and res[2] == 0x02:

@@ -3,10 +3,11 @@ from . import u2if_const as report_const
 
 
 class WS2812B:
-
-    def __init__(self, pin_id, direction=None, pull=None, value=None):
+    def __init__(
+        self, pin_id, direction=None, pull=None, value=None, serial_number_str=None
+    ):
         self._initialized = False
-        self._device = Device()
+        self._device = Device(serial_number_str=serial_number_str)
         self.pin_id = pin_id
         self._initialized = self._init()
 
@@ -43,9 +44,11 @@ class WS2812B:
             buffer.append(pixel[0] & 0xFF)
             buffer.append(pixel[1] & 0xFF)
 
-
         remain_bytes = len(buffer)
-        res = self._device.send_report(bytes([report_const.WS2812B_WRITE]) + remain_bytes.to_bytes(4, byteorder='little'))
+        res = self._device.send_report(
+            bytes([report_const.WS2812B_WRITE])
+            + remain_bytes.to_bytes(4, byteorder='little')
+        )
         if res[1] != report_const.OK and res[2] == 0x01:
             raise RuntimeError("WS2812B write error : too many pixel for the firmware.")
         elif res[1] != report_const.OK and res[2] == 0x02:

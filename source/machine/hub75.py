@@ -5,18 +5,20 @@ from . import u2if_const as report_const
 
 
 class HUB75:
-    def __init__(self, width, height):
+    def __init__(self, width, height, serial_number_str=None):
         self._initialized = False
         self._width = width
         self._height = height
-        self._device = Device()
+        self._device = Device(serial_number_str=serial_number_str)
         self.init()
 
     def __del__(self):
         self.deinit()
 
     def init(self):
-        res = self._device.send_report(bytes([report_const.HUB75_INIT, self._width, self._height]))
+        res = self._device.send_report(
+            bytes([report_const.HUB75_INIT, self._width, self._height])
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("Hub75 init error.")
         self._initialized = True
@@ -44,7 +46,10 @@ class HUB75:
             buffer.append(0)
 
         remain_bytes = len(buffer)
-        res = self._device.send_report(bytes([report_const.HUB75_WRITE]) + remain_bytes.to_bytes(4, byteorder='little'))
+        res = self._device.send_report(
+            bytes([report_const.HUB75_WRITE])
+            + remain_bytes.to_bytes(4, byteorder='little')
+        )
         if res[1] != report_const.OK and res[2] == 0x01:
             raise RuntimeError("HUB75 write error : too many pixel for the firmware.")
         elif res[1] != report_const.OK and res[2] == 0x02:

@@ -3,10 +3,11 @@ from . import u2if_const as report_const
 
 
 class PWM:
-
-    def __init__(self, pin, direction=None, pull=None, value=None):
+    def __init__(
+        self, pin, direction=None, pull=None, value=None, serial_number_str=None
+    ):
         self._initialized = False
-        self._device = Device()
+        self._device = Device(serial_number_str=serial_number_str)
         self.pin = pin
         self._initialized = self._init()
 
@@ -22,7 +23,9 @@ class PWM:
     def deinit(self):
         if not self._initialized:
             return
-        res = self._device.send_report(bytes([report_const.PWM_DEINIT_PIN, self.pin.id]))
+        res = self._device.send_report(
+            bytes([report_const.PWM_DEINIT_PIN, self.pin.id])
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("Pwm deinit error.")
 
@@ -46,8 +49,10 @@ class PWM:
 
     # Private methods
     def _set_freq(self, freq):
-        res = self._device.send_report(bytes([report_const.PWM_SET_FREQ, self.pin.id])
-                                       + freq.to_bytes(4, byteorder='little'))
+        res = self._device.send_report(
+            bytes([report_const.PWM_SET_FREQ, self.pin.id])
+            + freq.to_bytes(4, byteorder='little')
+        )
         if res[1] != report_const.OK and res[3] == 0x01:
             raise RuntimeError("Pwm different freq on same slice.")
         elif res[1] != report_const.OK and res[3] == 0x02:
@@ -61,29 +66,37 @@ class PWM:
         res = self._device.send_report(bytes([report_const.PWM_GET_FREQ, self.pin.id]))
         if res[1] != report_const.OK:
             raise RuntimeError("Pwm get freq error.")
-        return int.from_bytes(res[3:3+4], byteorder='little')
+        return int.from_bytes(res[3 : 3 + 4], byteorder='little')
 
     def _get_duty_u16(self):
-        res = self._device.send_report(bytes([report_const.PWM_GET_DUTY_U16, self.pin.id]))
+        res = self._device.send_report(
+            bytes([report_const.PWM_GET_DUTY_U16, self.pin.id])
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("Pwm get duty_u16 error.")
-        return int.from_bytes(res[3:3+2], byteorder='little')
+        return int.from_bytes(res[3 : 3 + 2], byteorder='little')
 
     def _set_duty_u16(self, duty_u16):
-        res = self._device.send_report(bytes([report_const.PWM_SET_DUTY_U16, self.pin.id])
-                                       + duty_u16.to_bytes(2, byteorder='little'))
+        res = self._device.send_report(
+            bytes([report_const.PWM_SET_DUTY_U16, self.pin.id])
+            + duty_u16.to_bytes(2, byteorder='little')
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("Pwm set duty_u16 error.")
 
     def _get_duty_ns(self):
-        res = self._device.send_report(bytes([report_const.PWM_GET_DUTY_NS, self.pin.id]))
+        res = self._device.send_report(
+            bytes([report_const.PWM_GET_DUTY_NS, self.pin.id])
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("Pwm get duty_us error.")
-        return int.from_bytes(res[3:3+4], byteorder='little')
+        return int.from_bytes(res[3 : 3 + 4], byteorder='little')
 
     def _set_duty_ns(self, duty_ns):
-        res = self._device.send_report(bytes([report_const.PWM_SET_DUTY_NS, self.pin.id])
-                                       + duty_ns.to_bytes(4, byteorder='little'))
+        res = self._device.send_report(
+            bytes([report_const.PWM_SET_DUTY_NS, self.pin.id])
+            + duty_ns.to_bytes(4, byteorder='little')
+        )
         if res[1] != report_const.OK and res[3] == 0x01:
             raise RuntimeError("Pwm too large duty_ns.")
         elif res[1] != report_const.OK:

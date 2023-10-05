@@ -5,22 +5,25 @@ from . import u2if_const as report_const
 
 
 class UART:
-    def __init__(self, uart_index=0):
+    def __init__(self, uart_index=0, serial_number_str=None):
         self._initialized = False
         if uart_index >= 2:
             raise RuntimeError("Uart index error.")
         self.uart_index = uart_index
         self._rx_buffer = queue.Queue()
         self.end_line_char = 10
-        self._device = Device()
+        self._device = Device(serial_number_str=serial_number_str)
 
     def __del__(self):
         self.deinit()
 
     def init(self, baudrate=9600):
-        report_id = report_const.UART0_INIT if self.uart_index == 0 else report_const.UART1_INIT
-        res = self._device.send_report(bytes([report_id, 0x00])
-                                       + baudrate.to_bytes(4, byteorder='little'))
+        report_id = (
+            report_const.UART0_INIT if self.uart_index == 0 else report_const.UART1_INIT
+        )
+        res = self._device.send_report(
+            bytes([report_id, 0x00]) + baudrate.to_bytes(4, byteorder='little')
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("Uart init error.")
         self._initialized = True
@@ -29,7 +32,11 @@ class UART:
     def deinit(self):
         if not self._initialized:
             return
-        report_id = report_const.UART0_DEINIT if self.uart_index == 0 else report_const.UART1_DEINIT
+        report_id = (
+            report_const.UART0_DEINIT
+            if self.uart_index == 0
+            else report_const.UART1_DEINIT
+        )
         res = self._device.send_report(bytes([report_id]))
         if res[1] != report_const.OK:
             raise RuntimeError("Uart deinit error.")
@@ -57,7 +64,11 @@ class UART:
                 break
 
         res_array = []
-        nb_char = min(nbBytes, self._rx_buffer.qsize()) if nbBytes > 0 else self._rx_buffer.qsize()
+        nb_char = (
+            min(nbBytes, self._rx_buffer.qsize())
+            if nbBytes > 0
+            else self._rx_buffer.qsize()
+        )
         for i in range(nb_char):
             res_array.append(self._rx_buffer.get())
         return res_array
@@ -83,22 +94,30 @@ class UART:
         return res_array
 
     def _read_rx_buffer(self):
-        report_id = report_const.UART0_READ if self.uart_index == 0 else report_const.UART1_READ
+        report_id = (
+            report_const.UART0_READ if self.uart_index == 0 else report_const.UART1_READ
+        )
         res = self._device.send_report(bytes([report_id]))
         if res[1] != report_const.OK:
             raise RuntimeError("Uart read rx buffer error.")
         payload_size = res[2]
         for i in range(payload_size):
-            self._rx_buffer.put(res[3+i])
+            self._rx_buffer.put(res[3 + i])
 
     def write(self, buffer):
-        report_id = report_const.UART0_WRITE if self.uart_index == 0 else report_const.UART1_WRITE
+        report_id = (
+            report_const.UART0_WRITE
+            if self.uart_index == 0
+            else report_const.UART1_WRITE
+        )
         start = 0
         end = len(buffer)
         while (end - start) > 0:
             remain_bytes = end - start
             chunk = min(remain_bytes, report_const.HID_REPORT_SIZE - 3)
-            res = self._device.send_report(bytes([report_id, chunk]) + buffer[start: (start + chunk)])
+            res = self._device.send_report(
+                bytes([report_id, chunk]) + buffer[start : (start + chunk)]
+            )
             if res[1] != report_const.OK:
                 raise RuntimeError("Uart write error.")
             start += chunk

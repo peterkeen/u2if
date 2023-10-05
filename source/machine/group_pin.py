@@ -4,10 +4,9 @@ from . import u2if_const as report_const
 
 
 class GroupPin:
-
-    def __init__(self, pins_list,value=None):
+    def __init__(self, pins_list, value=None, serial_number_str=None):
         self._pins = pins_list
-        self._device = Device()
+        self._device = Device(serial_number_str=serial_number_str)
         self._mask = 0x00
         self.init(value)
 
@@ -55,15 +54,15 @@ class GroupPin:
     def _get_value(self, invert=False):
         res = self._device.send_report(bytes([report_const.GROUP_GPIO_GET_ALL_VALUES]))
         if res[1] != report_const.OK:
-             raise RuntimeError("Pin read error.")
-        input = int.from_bytes(res[2:2+4], byteorder='little')
+            raise RuntimeError("Pin read error.")
+        input = int.from_bytes(res[2 : 2 + 4], byteorder='little')
 
         value = 0
         bit_index = 0
         for pin in reversed(self._pins):
-            bit = ((input >> pin.id) & 0x01)
+            bit = (input >> pin.id) & 0x01
             if invert is True:
-                bit =  not bit
+                bit = not bit
             value |= bit << bit_index
             bit_index = bit_index + 1
         return value
@@ -76,9 +75,11 @@ class GroupPin:
                 pin_values |= 1 << pin.id
             bit_index = bit_index << 1
 
-        res = self._device.send_report(bytes([report_const.GROUP_GPIO_SET_VALUES]) +
-                                              self._mask.to_bytes(4, byteorder='little') +
-                                              pin_values.to_bytes(4, byteorder='little'))
+        res = self._device.send_report(
+            bytes([report_const.GROUP_GPIO_SET_VALUES])
+            + self._mask.to_bytes(4, byteorder='little')
+            + pin_values.to_bytes(4, byteorder='little')
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("Groups pins write error.")
         return value

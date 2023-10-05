@@ -13,11 +13,13 @@ class Pin:
     IRQ_FALLING = report_const.EVENT_FALLING
     IRQ_RISING = report_const.EVENT_RISING
 
-    def __init__(self, pin_id, mode=None, pull=None, value=None):
+    def __init__(
+        self, pin_id, mode=None, pull=None, value=None, serial_number_str=None
+    ):
         self.id = pin_id
         self.mode = mode
         self.has_irq = False
-        self._device = Device()
+        self._device = Device(serial_number_str=serial_number_str)
         if mode is not None:
             self.init(mode, pull, value)
 
@@ -35,7 +37,9 @@ class Pin:
         elif mode == self.IN and pull == self.PULL_DOWN:
             config_pull = 0x02
         direction_conf = 0x00 if mode == self.IN else 0x01
-        res = self._device.send_report(bytes([report_const.GPIO_INIT_PIN, self.id, direction_conf, config_pull]))
+        res = self._device.send_report(
+            bytes([report_const.GPIO_INIT_PIN, self.id, direction_conf, config_pull])
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("Pin init error.")
 
@@ -62,7 +66,9 @@ class Pin:
 
     def _set_value(self, value):
         value_cmd = 0x00 if value == self.LOW else 0x01
-        res = self._device.send_report(bytes([report_const.GPIO_SET_VALUE, self.id, value_cmd]))
+        res = self._device.send_report(
+            bytes([report_const.GPIO_SET_VALUE, self.id, value_cmd])
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("Pin read error.")
         return value
@@ -78,14 +84,18 @@ class Pin:
             return
 
         self._device.unregister_callback(self.id)
-        res = self._device.send_report(bytes([report_const.GPIO_SET_IRQ, self.id, report_const.EVENT_NONE, 0x00]))
+        res = self._device.send_report(
+            bytes([report_const.GPIO_SET_IRQ, self.id, report_const.EVENT_NONE, 0x00])
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("Remove irq error.")
         self.has_irq = False
 
     def _add_irq(self, callback, events, debounce=False):
         debounce_flag = 0x00 if debounce is False else 0x01
-        res = self._device.send_report(bytes([report_const.GPIO_SET_IRQ, self.id, events, debounce_flag]))
+        res = self._device.send_report(
+            bytes([report_const.GPIO_SET_IRQ, self.id, events, debounce_flag])
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("Remove irq error.")
         self._device.register_callback(self.id, callback)
