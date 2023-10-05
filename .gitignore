@@ -1,12 +1,12 @@
 firmware/release
-firmware/source/build/
+firmware/source/build*/
 firmware/source/board_config.h
 examples/external/ressources/sound/music.wav
 *.pio.h
 *.idea
 dist
 u2if.egg-info
-build
+build*
 *.txt.user
 __pycache__
 venv/

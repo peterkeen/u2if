@@ -6,22 +6,23 @@ from . import u2if_const as report_const
 
 COMPATIBLE_BOARD_PID_VID = [
     # (VID, PID)
-    (0xcafe, 0x4005),  # pico
-    (0x239a, 0x00f1),  # Adafruit Feather
-    (0x239a, 0x8130),  # Adafruit Feather CAN Bus
-    (0x239a, 0x812C),  # Adafruit Feather ThinkInk
-    (0x239a, 0x812E),  # Adafruit Feather RFM
-    (0x239a, 0x00fd),  # Adafruit ItsyBitsy
-    (0x239a, 0x0105),  # Adafruit KB2040
-    (0x239a, 0x0109),  # Adafruit QT2040 Trinket
-    (0x239a, 0x00f7),  # Adafruit QTPY
+    (0xCAFE, 0x4005),  # pico
+    (0x239A, 0x00F1),  # Adafruit Feather
+    (0x239A, 0x8130),  # Adafruit Feather CAN Bus
+    (0x239A, 0x812C),  # Adafruit Feather ThinkInk
+    (0x239A, 0x812E),  # Adafruit Feather RFM
+    (0x239A, 0x00FD),  # Adafruit ItsyBitsy
+    (0x239A, 0x0105),  # Adafruit KB2040
+    (0x239A, 0x0109),  # Adafruit QT2040 Trinket
+    (0x239A, 0x00F7),  # Adafruit QTPY
 ]
 
 
-class Device(metaclass=helper.Singleton):
-
+class Device:
     def __init__(self, serial_number_str=None):
-        self.vid, self.pid, self.serial_number = self._get_compatible_board_and_reset(serial_number_str)
+        self.vid, self.pid, self.serial_number = self._get_compatible_board_and_reset(
+            serial_number_str
+        )
         if self.serial_number is None:
             raise ValueError("No board found")
         time.sleep(1)
@@ -56,11 +57,15 @@ class Device(metaclass=helper.Singleton):
         return self.firmware_version
 
     def send_report(self, report, response=True):
-        self._hid.write(b"\0" + report + b"\0" * (report_const.HID_REPORT_SIZE - len(report)))
+        self._hid.write(
+            b"\0" + report + b"\0" * (report_const.HID_REPORT_SIZE - len(report))
+        )
         if response:
             res = self.read_hid(report[0])
             if res[1] == report_const.NOT_CONCERNED:
-                raise RuntimeError("Unknown command. Maybe the interface is not enabled in firmware.")
+                raise RuntimeError(
+                    "Unknown command. Maybe the interface is not enabled in firmware."
+                )
             return res
         return None
 
@@ -116,4 +121,4 @@ class Device(metaclass=helper.Singleton):
         if response[1] != report_const.OK:
             raise RuntimeError("Retrieve V/N error.")
         else:
-            return list(response[2:2+3])
+            return list(response[2 : 2 + 3])

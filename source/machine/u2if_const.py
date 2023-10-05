@@ -25,6 +25,7 @@ class u2if:
     GP20 = 20
     GP21 = 21
     GP22 = 22
+    GP25 = 25
     GP26 = 26
     GP27 = 27
     GP28 = 28
@@ -61,6 +62,9 @@ class u2if:
     # # I2C1
     # GP14_I2C1_SDA = 14
     # GP15_I2C1_SCL = 15
+    #
+    # Onboard LED
+    LED = 25
 
 
 HID_REPORT_SIZE = 64

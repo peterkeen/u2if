@@ -2,6 +2,8 @@
 
 #include "hardware/gpio.h"
 
+#include "pico/stdlib.h"
+
 // Activity led
 const uint8_t LED_PIN = 25;
 DeviceState ModeActivity::_sDeviceState = DeviceState::NOT_MOUNTED;
@@ -26,8 +28,11 @@ void ModeActivity::init() {
     // init activity led and timer
     gpio_init(LED_PIN);
     gpio_set_dir(LED_PIN, true);
+    //gpio_put(LED_PIN, false);
+    //add_repeating_timer_ms(-LED_TASK_PERIODS_MS, ledTask, NULL, &_sLedTimer);
+    gpio_put(LED_PIN, true);
+    sleep_ms(10);
     gpio_put(LED_PIN, false);
-    add_repeating_timer_ms(-LED_TASK_PERIODS_MS, ledTask, NULL, &_sLedTimer);
 }
 
 void ModeActivity::setDeviceState(DeviceState deviceState) {

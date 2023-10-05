@@ -5,10 +5,12 @@ from . import u2if_const as report_const
 
 
 class I2C(object):
-    def __init__(self, *, i2c_index=0, frequency=100000, pullup=False):
+    def __init__(
+        self, *, i2c_index=0, frequency=100000, pullup=False, serial_number_str=None
+    ):
         self.i2c_index = i2c_index
         self._initialized = False
-        self._device = Device()
+        self._device = Device(serial_number_str=serial_number_str)
         self._i2c_configure(frequency, pullup)
 
     def __del__(self):
@@ -17,7 +19,15 @@ class I2C(object):
     def deinit(self):
         if not self._initialized:
             return
-        res = self._device.send_report(bytes([report_const.I2C0_DEINIT if self.i2c_index == 0 else report_const.I2C1_DEINIT]))
+        res = self._device.send_report(
+            bytes(
+                [
+                    report_const.I2C0_DEINIT
+                    if self.i2c_index == 0
+                    else report_const.I2C1_DEINIT
+                ]
+            )
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("I2c deinit error.")
 
@@ -52,10 +62,16 @@ class I2C(object):
         return self.writeto(addr, bytes([memaddr]) + bytes(buf), False)
 
     # Internal methods
-    def _i2c_configure(self, baudrate=100000, pullup=False) :
+    def _i2c_configure(self, baudrate=100000, pullup=False):
         res = self._device.send_report(
-            bytes([report_const.I2C0_INIT if self.i2c_index == 0 else report_const.I2C1_INIT,
-                   0x00 if not pullup else 0x01])
+            bytes(
+                [
+                    report_const.I2C0_INIT
+                    if self.i2c_index == 0
+                    else report_const.I2C1_INIT,
+                    0x00 if not pullup else 0x01,
+                ]
+            )
             + baudrate.to_bytes(4, byteorder='little')
         )
         if res[1] != report_const.OK:
@@ -73,12 +89,16 @@ class I2C(object):
 
     def _i2c_readfrom_into(self, addr, buf, stop=True):
         read_size = len(buf)
-        report_id = report_const.I2C0_READ if self.i2c_index == 0 else report_const.I2C1_READ
-        res = self._device.send_report(bytes([report_id, addr, 0x01 if stop else 0x00, read_size]))
+        report_id = (
+            report_const.I2C0_READ if self.i2c_index == 0 else report_const.I2C1_READ
+        )
+        res = self._device.send_report(
+            bytes([report_id, addr, 0x01 if stop else 0x00, read_size])
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("I2C read error.")
         for i in range(read_size):
-            buf[i] = res[i+2]
+            buf[i] = res[i + 2]
 
     def _i2c_writeto(self, addr, buf, stop=True):
         if stop and len(buf) > 3 * report_const.HID_REPORT_SIZE:
@@ -91,9 +111,15 @@ class I2C(object):
             raise RuntimeError('_i2c_writeto_stream with not stop Not implemented')
 
         self._device.reset_output_serial()
-        report_id = report_const.I2C0_WRITE_FROM_UART if self.i2c_index == 0 else report_const.I2C1_WRITE_FROM_UART
+        report_id = (
+            report_const.I2C0_WRITE_FROM_UART
+            if self.i2c_index == 0
+            else report_const.I2C1_WRITE_FROM_UART
+        )
         remain_bytes = len(buf)
-        res = self._device.send_report(bytes([report_id, addr]) + remain_bytes.to_bytes(4, byteorder='little'))
+        res = self._device.send_report(
+            bytes([report_id, addr]) + remain_bytes.to_bytes(4, byteorder='little')
+        )
         if res[1] != report_const.OK:
             raise RuntimeError("I2C write error.")
 
@@ -103,7 +129,9 @@ class I2C(object):
             raise RuntimeError("I2C write error.")
 
     def _i2c_writeto_direct(self, addr, buf, stop=True):
-        report_id = report_const.I2C0_WRITE if self.i2c_index == 0 else report_const.I2C1_WRITE
+        report_id = (
+            report_const.I2C0_WRITE if self.i2c_index == 0 else report_const.I2C1_WRITE
+        )
         stop_flag = 0x01 if stop else 0x00
         start = 0
         end = len(buf)
@@ -111,7 +139,10 @@ class I2C(object):
             remain_bytes = end - start
             chunk = min(remain_bytes, report_const.HID_REPORT_SIZE - 7)
             res = self._device.send_report(
-                bytes([report_id, addr, stop_flag]) + remain_bytes.to_bytes(4, byteorder='little') + buf[start : (start + chunk)])
+                bytes([report_id, addr, stop_flag])
+                + remain_bytes.to_bytes(4, byteorder='little')
+                + buf[start : (start + chunk)]
+            )
             if res[1] != report_const.OK:
                 raise RuntimeError("I2C write error.")
 
