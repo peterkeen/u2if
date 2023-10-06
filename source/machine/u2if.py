@@ -18,7 +18,7 @@ COMPATIBLE_BOARD_PID_VID = [
 ]
 
 
-class Device:
+class Device(metaclass=helper.Singleton):
     def __init__(self, serial_number_str=None):
         self.vid, self.pid, self.serial_number = self._get_compatible_board_and_reset(
             serial_number_str
