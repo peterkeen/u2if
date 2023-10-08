@@ -58,8 +58,8 @@ class I2C(object):
         self.writeto(addr, bytes([memaddr]), False)
         return self.readfrom_into(addr, buf, True)
 
-    def writeto_mem(self, addr, memaddr, buf):
-        return self.writeto(addr, bytes([memaddr]) + bytes(buf), False)
+    def writeto_mem(self, addr, memaddr, buf, stop=True):
+        return self.writeto(addr, bytes([memaddr]) + bytes(buf), stop)
 
     # Internal methods
     def _i2c_configure(self, baudrate=100000, pullup=False):
