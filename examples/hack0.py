@@ -2,10 +2,14 @@ from machine import I2C, u2if, Pin
 from mcp23017 import MCP23017
 import hid
 from dataclasses import dataclass
+from typing import Callable
 
 import machine
 import time
 import _thread
+
+import threading
+from icecream import ic
 
 VID_U2IF_PICO = 0xCAFE
 PID_U2IF_PICO = 0x4005
@@ -96,30 +100,59 @@ leds = [x.ctrl_sig['led'] for x in controllers]
 
 @dataclass
 class UsrLED:
-    duration: float = 0.0
+    _on: list[Callable]
+    _off: list[Callable]
+    _duration: float = 0.0
 
-    def blink(self, duration: float = 0.010):
-        self.duration = duration
+    def __init__(self, on: list[Callable], off: list[Callable]):
+        self._on = on
+        self._off = off
+
+    # def __post__(self):
+    #     self._lock = threading.Lock()
+
+    def blink(self, duration: float = 0.01):
+        # ic()
+        # self._lock.acquire()
+        self._duration += duration
+        # self._lock.release()
+
+    @property
+    def disable(self):
+        # self._lock.acquire()
+        self._duration = 0.0
+        # self._lock.release()
+
+    @property
+    def is_enable(self):
+        return self._duration > 0.0
+
+    def _blink(self):
+        sec: float = self._duration
+        # self._lock.acquire()
+        delta: float = self._duration - sec
+        self._duration = delta if delta > 0.0 else 0.0
+        # self._lock.release()
+        # _ = [led.on() for led in leds]
+        _ = [x() for x in self._on]
+        time.sleep(sec)
+        _ = [x() for x in self._off]
 
 
 def core1_task(usrled: UsrLED):
-    # global leds_on
     while True:
-        # spLock.acquire()
-        if usrled.duration > 0.0:
-            _ = [led.on() for led in leds]
-            time.sleep(usrled.duration)
-            _ = [led.off() for led in leds]
-            usrled.duration = 0.0
-            continue
-        # spLock.release()
-        time.sleep(0.001)
+        if usrled.is_enable and not ('thread' in locals() and thread.is_alive()):
+            thread = threading.Thread(target=usrled._blink)
+            thread.start()
+            # print(f"core1_task ...", flush=True)
+
+        # Other concurrent tasks ...
 
 
-usrled = UsrLED()
+usrled = UsrLED(on=[led.on for led in leds], off=[led.off for led in leds])
 _thread.start_new_thread(core1_task, (usrled,))
 
-# Blink the user leds for 1s
+# Turn on the user leds for 3s
 usrled.blink(3.0)
 
 #
