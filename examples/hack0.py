@@ -53,7 +53,10 @@ class UsrLED:
     _on: list[Callable]
     _off: list[Callable]
     _pulsing: float = 0.0
-    _blinking: tuple[BlinkState, int] = (BlinkState.OFF, 0)  # (state, controller_index)
+    _blinking: tuple[BlinkState, list[int,]] = (
+        BlinkState.OFF,
+        [0],
+    )  # (state, controller_index)
 
     def __init__(self, on: list[Callable], off: list[Callable]):
         self._on = on
@@ -68,14 +71,22 @@ class UsrLED:
         self._pulsing += duration
         # self._lock.release()
 
-    def blink(self, controller_index: int = 0) -> None:
-        self._blinking = (self.BlinkState.ON, controller_index)
+    def blink(
+        self,
+        controller_index: list[int,] = [
+            0,
+        ],
+    ) -> None:
+        self._blinking = (
+            self.BlinkState.ON,
+            [controller_index] if type(controller_index) == int else controller_index,
+        )
 
     @property
     def disable(self):
         # self._lock.acquire()
         self._pulsing = 0.0
-        self._blinking = (self.BlinkState.OFF, 0)
+        self._blinking = (self.BlinkState.OFF, [0])
         # self._lock.release()
 
     @property
@@ -98,7 +109,7 @@ class UsrLED:
 
     def _blink_until_stop(self):
         while self.is_blinking:
-            _ = [x() for i, x in enumerate(self._on) if i == self._blinking[-1]]
+            _ = [self._on[x]() for x in self._blinking[-1] if x < len(self._on)]
             time.sleep(self._blinking[0])
             _ = [x() for x in self._off]
             time.sleep(self._blinking[0])
@@ -269,7 +280,11 @@ usrled = fxt_group.usrled
 _thread.start_new_thread(core1_task, (usrled,))
 
 # Turn on the user leds for 3s
-usrled.pulse(3.0)
+# usrled.pulse(3.0)
+# __import__('pdb').set_trace()
+usrled.blink(list(range(0, len(fxt_group.controllers))))
+time.sleep(1.0)
+usrled.disable
 
 #
 resetns = [x.ctrl_sig['resetn'] for x in controllers]
