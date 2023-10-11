@@ -68,6 +68,9 @@ class UsrLED:
         self._pulsing += duration
         # self._lock.release()
 
+    def blink(self, controller_index: int = 0) -> None:
+        self._blinking = (self.BlinkState.ON, controller_index)
+
     @property
     def disable(self):
         # self._lock.acquire()
