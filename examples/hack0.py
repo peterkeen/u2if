@@ -18,8 +18,7 @@ CTRL_SIGS: dict = {
     's1_on': u2if.GP10,
     's2_on': u2if.GP11,
     's3_on': u2if.GP12,
-    'tout_open': u2if.GP13,
-    'resetn': u2if.GP15,
+    'resetn': u2if.GP13,
     'vbias_5_on': u2if.GP16,
     'vbin_2p9_on': u2if.GP17,
     'vtin_2p9_on': u2if.GP18,
@@ -82,12 +81,27 @@ class UsrLED:
             [controller_index] if type(controller_index) == int else controller_index,
         )
 
+    def on(
+        self,
+        controller_indices: list[int,] = [
+            0,
+        ],
+    ) -> None:
+        li = (
+            [controller_indices]
+            if type(controller_indices) == int
+            else controller_indices
+        )
+        for i in li:
+            self._on[i]()
+
     @property
     def disable(self):
         # self._lock.acquire()
         self._pulsing = 0.0
         self._blinking = (self.BlinkState.OFF, [0])
         # self._lock.release()
+        _ = [off() for off in self._off]
 
     @property
     def is_pulsing(self):
@@ -158,8 +172,11 @@ class GAM02_Fxt_Controller:
         # Scan the i2c bus and init the mcp list with the discovered MCP23017s
         i2c_addresses = self.i2c.scan()
         for i2c_addr in i2c_addresses:
-            mcp = MCP23017(self.i2c, i2c_addr)
-            self.mcp.append(mcp)
+            self.mcp.append(MCP23017(self.i2c, i2c_addr))
+
+        # After being created, the MCP23017 objects need to be re-initialized
+        for mcp in self.mcp:
+            mcp.mode = 0xFFFF  # All inputs
 
     @property
     def led(self) -> Pin:
