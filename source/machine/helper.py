@@ -57,7 +57,8 @@ def find_serial_port(vid, pid, serial_number_str=None):
                 and check_port.pid == pid
                 and (
                     serial_number_str is None
-                    or check_port.serial_number == serial_number_str
+                    or check_port.serial_number.lower()
+                    == serial_number_str.lower()  # clpham: case insensitive
                 )
             ):
                 return check_port.device
