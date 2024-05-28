@@ -31,9 +31,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: firmware_uf2s
-          path: firmware/source/release/u2if_*.uf2
+          path: firmware/release/u2if_*.uf2
       - name: Add Release Assets
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: firmware/source/release/u2if_*.uf2
+          files: firmware/release/u2if_*.uf2
