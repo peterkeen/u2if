@@ -3,9 +3,15 @@
 
 I2CMaster::I2CMaster(uint8_t i2cIndex, uint streamBufferSize = 512)
     : StreamedInterface(streamBufferSize),
+      #if I2C1_ENABLE
       _i2cInst(i2cIndex == 0 ? i2c0 : i2c1),
       _sdaGP(i2cIndex == 0 ? U2IF_I2C0_SDA : U2IF_I2C1_SDA),
       _sclGP(i2cIndex == 0 ? U2IF_I2C0_SCL : U2IF_I2C1_SCL),
+      #else
+      _i2cInst(i2c0),
+      _sdaGP(U2IF_I2C0_SDA),
+      _sclGP(U2IF_I2C0_SCL),
+      #endif
       _currentStreamAddress(0) {
 
 }

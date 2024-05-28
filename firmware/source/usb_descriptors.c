@@ -79,6 +79,11 @@
   #define USB_PRD "KB2040 Kee Boar U2IF"
   #define USB_VID 0x239A
   #define USB_PID 0x0105
+#elif BOARD == SPARKFUN_PRO_MICRO_RP2040
+  #define USB_MFG "SparkFun"
+  #define USB_PRD "Pro Micro RP2040"
+  #define USB_VID 0x1B4F
+  #define USB_PID 0x0026
 #elif BOARD == PICO
   #define USB_MFG "Pico"
   #define USB_PRD "U2IF"

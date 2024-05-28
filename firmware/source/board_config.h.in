@@ -17,6 +17,7 @@
 #define FEATHER_RFM     7
 #define FEATHER_CAN     8
 #define KB2040          9
+#define SPARKFUN_PRO_MICRO_RP2040 10
 
 
 #define BOARD ${BOARD}
@@ -225,6 +226,31 @@
   #define U2IF_UART0_TX 0
   #define U2IF_UART0_RX 1
 
+//---------------------------------------------------------
+// Pico (default)
+//---------------------------------------------------------
+#elif BOARD == SPARKFUN_PRO_MICRO_RP2040
+  // I2C0
+  #define I2C0_ENABLED 1
+  #define U2IF_I2C0_SDA 16
+  #define U2IF_I2C0_SCL 17
+  // I2C1
+  #define I2C1_ENABLED 0
+  // SPI0
+  #define SPI0_ENABLED 1
+  #define U2IF_SPI0_CK 22
+  #define U2IF_SPI0_MOSI 23
+  #define U2IF_SPI0_MISO 20
+  // SPI1
+  #define SPI1_ENABLED 0
+  // UART0
+  #define UART0_ENABLED 1
+  #define U2IF_UART0_TX 0
+  #define U2IF_UART0_RX 1
+  // UART1
+  #define UART1_ENABLED 1
+  #define U2IF_UART1_TX 8
+  #define U2IF_UART1_RX 9
 //---------------------------------------------------------
 // Pico (default)
 //---------------------------------------------------------

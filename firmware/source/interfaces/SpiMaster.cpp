@@ -4,10 +4,18 @@
 
 SPIMaster::SPIMaster(uint8_t spiIndex, uint streamBufferSize = 512)
     : StreamedInterface(streamBufferSize),
+      #if SPI_ENABLED
       _spiInst(spiIndex == 0 ? spi0 : spi1),
       _clkGP(spiIndex == 0 ? U2IF_SPI0_CK : U2IF_SPI1_CK),
       _mosiGP(spiIndex == 0 ? U2IF_SPI0_MOSI : U2IF_SPI1_MOSI),
-      _misoGP(spiIndex == 0 ? U2IF_SPI0_MISO : U2IF_SPI1_MISO){
+      _misoGP(spiIndex == 0 ? U2IF_SPI0_MISO : U2IF_SPI1_MISO)
+      #else
+      _spiInst(spi0),
+      _clkGP(U2IF_SPI0_CK),
+      _mosiGP(U2IF_SPI0_MOSI),
+      _misoGP(U2IF_SPI0_MISO)
+      #endif
+{
 
 }
 
