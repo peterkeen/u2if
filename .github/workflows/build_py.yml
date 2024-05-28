@@ -15,7 +15,7 @@ jobs:
           python-version: '3.12'
 
       - name: build python dist
-        run: python -m build
+        run: pip install --upgrade build && python -m build
 
       - name: Add Build Artifacts to CI Run
         uses: actions/upload-artifact@v3
