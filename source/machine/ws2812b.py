@@ -4,11 +4,12 @@ from . import u2if_const as report_const
 
 class WS2812B:
     def __init__(
-        self, pin_id, direction=None, pull=None, value=None, serial_number_str=None
+            self, pin_id, direction=None, pull=None, value=None, serial_number_str=None, rgbw=False
     ):
         self._initialized = False
         self._device = Device(serial_number_str=serial_number_str)
         self.pin_id = pin_id
+        self.rgbw = rgbw
         self._initialized = self._init()
 
     def __del__(self):
@@ -17,7 +18,10 @@ class WS2812B:
     def _init(self):
         if self._initialized:
             return
-        res = self._device.send_report(bytes([report_const.WS2812B_INIT, self.pin_id]))
+        chip_type = report_const.WS2812B_RGB
+        if self.rgbw:
+            chip_type = report.const.WS2812B_RGBW
+        res = self._device.send_report(bytes([report_const.WS2812B_INIT, self.pin_id, chip_type]))
         if res[1] != report_const.OK:
             raise RuntimeError("WS2812B init error.")
         return True

@@ -192,6 +192,8 @@ WS2812B_DEINIT = 0xA1
 # | WS2812B_WRITE  | NB_BYTES[4] L.Endian (== NB_LED *4)| => First | WS2812B_WRITE | CmdStatus::OK|NOK | err:0x01 (Too many led for the firmware) err:0x02 (Transfer already in progress) |
 # ... and after the CDC stream (when transfer to led starting) | WS2812B_WRITE | CmdStatus::OK |
 WS2812B_WRITE = 0xA2
+WS2812B_RGB = 0xA3
+WS2812B_RGBW = 0xA4
 
 # I2S
 # |I2S_INIT | MODE (0x01: mono 0x02: stereo) => Mode not implementedonly stereo 16bit/channel |

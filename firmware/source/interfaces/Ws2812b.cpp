@@ -76,7 +76,9 @@ CmdStatus Ws2812b::init(uint8_t const *cmd) {
 
     _offsetProgram = pio_add_program(_pio, &ws2812_program);
     const uint pinId = cmd[1];
-    ws2812_program_init(_pio, _sm, _offsetProgram, pinId, 800000, false);
+    const bool rgbw = cmd[2] == Report::ID::WS2812B_RGBW;
+
+    ws2812_program_init(_pio, _sm, _offsetProgram, pinId, 800000, rgbw);
 
     setInterfaceState(InterfaceState::INTIALIZED);
     return CmdStatus::OK;
