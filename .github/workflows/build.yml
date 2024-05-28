@@ -112,7 +112,7 @@ jobs:
       - name: Download uf2 artifacts
         uses: actions/download-artifact@v4
         with:
-          name: firmware_uf2
+          name: firmware_uf2s
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
