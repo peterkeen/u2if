@@ -15,6 +15,7 @@ COMPATIBLE_BOARD_PID_VID = [
     (0x239A, 0x0105),  # Adafruit KB2040
     (0x239A, 0x0109),  # Adafruit QT2040 Trinket
     (0x239A, 0x00F7),  # Adafruit QTPY
+    (0x1B4F, 0x0026),  # SparkFun Pro Micro RP2040
 ]
 
 
