@@ -3,6 +3,9 @@ FROM python:latest
 WORKDIR /app
 RUN mkdir /app/firmware
 
+RUN apt-get update && apt-get install libusb-1.0 libudev-dev
+RUN pip install hidapi pyserial
+
 COPY *.uf2 /app/firmware
 COPY *.tar.gz /app
 
