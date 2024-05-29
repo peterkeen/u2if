@@ -64,7 +64,7 @@ jobs:
       - name: Add Build Artifacts to CI Run
         uses: actions/upload-artifact@v4
         with:
-          name: u2if_*.uf2
+          name: u2if_${{ matrix.target }}.uf2
           path: firmware/release/u2if_${{ matrix.target }}.uf2
       - name: Add Release Assets
         uses: softprops/action-gh-release@v1

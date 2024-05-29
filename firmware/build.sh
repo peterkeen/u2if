@@ -18,6 +18,6 @@ FIRMWARE_ROOT_DIR=$PWD
 cd $tmp_dir
 cmake -DBOARD=$2 -DI2S_ALLOW=$3 -DWS2812_ENABLED=$4 -DWS2812_SIZE=$5 -DHUB75_ALLOW=$6 $FIRMWARE_ROOT_DIR/source
 make -j$CORES_NB
-cp u2if.uf2 $RELEASE_DIR/u2if_$1_v$VERSION.uf2
+cp u2if.uf2 $RELEASE_DIR/u2if_$1.uf2
 cd $FIRMWARE_ROOT_DIR
 rm -rf $tmp_dir
