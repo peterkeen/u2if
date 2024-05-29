@@ -12,8 +12,22 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  setup:
+    runs-on: ubutnu-latest
+    outputs:
+      flavor_matrix: ${{ steps.flavorStep.outputs.flavors }}
+    steps:
+      - id: flavorStep
+        run: |
+          FLAVORS=$(./firmware/build.py -flavors)
+          echo "flavors='$flavors'" >> $GITHUB_OUTPUT
+          
   build_uf2:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flavors: ${{ fromJson(needs.setup.outputs.flavor_matrix) }}
+
     steps:
       - uses: actions/checkout@v4
       - name: Install gcc-arm
@@ -32,17 +46,17 @@ jobs:
         run: |
           arm-none-eabi-gcc --version
           cd firmware
-          ./build-all.sh
+          ./build.py ${{ matrix.target }}
       - name: Add Build Artifacts to CI Run
         uses: actions/upload-artifact@v4
         with:
-          name: firmware_uf2s
-          path: firmware/release/u2if_*.uf2
+          name: u2if_${{ matrix.target }}.uf2
+          path: firmware/release/u2if_${{ matrix.target }}.uf2
       - name: Add Release Assets
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: firmware/release/u2if_*.uf2
+          files: firmware/release/u2if_${{ matrix.target }}.uf2
 
   build_py:
     runs-on: ubuntu-latest
