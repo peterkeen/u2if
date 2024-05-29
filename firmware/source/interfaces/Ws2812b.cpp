@@ -76,7 +76,7 @@ CmdStatus Ws2812b::init(uint8_t const *cmd) {
 
     _offsetProgram = pio_add_program(_pio, &ws2812_program);
     const uint pinId = cmd[1];
-    const bool rgbw = cmd[2] == Report::ID::WS2812B_RGBW;
+    const bool rgbw = cmd[2] == 1;
 
     ws2812_program_init(_pio, _sm, _offsetProgram, pinId, 800000, rgbw);
 
