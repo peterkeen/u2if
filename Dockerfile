@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:slim
 
 WORKDIR /app
 RUN mkdir /app/firmware
