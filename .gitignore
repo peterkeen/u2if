@@ -6,7 +6,6 @@ examples/external/ressources/sound/music.wav
 *.idea
 dist
 u2if.egg-info
-build*
 *.txt.user
 __pycache__
 venv/
