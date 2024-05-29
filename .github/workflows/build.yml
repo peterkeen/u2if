@@ -13,7 +13,7 @@ env:
 
 jobs:
   setup:
-    runs-on: ubutnu-latest
+    runs-on: ubuntu-latest
     outputs:
       flavor_matrix: ${{ steps.flavorStep.outputs.flavors }}
     steps:
