@@ -17,6 +17,7 @@ jobs:
     outputs:
       flavor_matrix: ${{ steps.flavorStep.outputs.flavors }}
     steps:
+      - uses: actions/checkout@v4      
       - id: flavorStep
         run: |
           FLAVORS=$(./firmware/build.py -flavors)
