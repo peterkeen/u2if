@@ -28,6 +28,6 @@ if len(sys.argv) == 1:
         build(flavor)
 else:
     if sys.argv[1] == "-flavors":
-        print(json.dumps({"flavors": list(FLAVORS.keys())}))
+        print(json.dumps({"target": list(FLAVORS.keys())}))
     else:
         build(sys.argv[1])
