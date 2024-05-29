@@ -135,7 +135,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          merge_multiple: true
+          merge-multiple: true
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
