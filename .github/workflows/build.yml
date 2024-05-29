@@ -60,7 +60,7 @@ jobs:
         run: |
           arm-none-eabi-gcc --version
           cd firmware
-          ./build.py ${{ matrix.target }}
+          python3 build.py ${{ matrix.target }}
       - name: Add Build Artifacts to CI Run
         uses: actions/upload-artifact@v4
         with:
@@ -132,15 +132,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Download python artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
-        with:
-          name: u2if_py
-
-      - name: Download uf2 artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: firmware_uf2s
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
