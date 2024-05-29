@@ -37,7 +37,8 @@ jobs:
           release: '10-2020-q4'
       - id: pico-sdk-cache-key
         run: |
-          echo "cachekey=$(git submodule status firmware/pico-sdk | cut -d' ' -f 2)" >> $GITHUB_OUTPUT
+          CACHEKEY=$(git submodule status firmware/pico-sdk | cut -d' ' -f 2)
+          echo "cachekey=$CACHEKEY" >> $GITHUB_OUTPUT
 
       - name: Cache pico-sdk
         id: cache-pico-sdk
