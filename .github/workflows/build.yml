@@ -40,8 +40,10 @@ jobs:
           cache-key: ${{ steps.cacheKey.outputs.cachekey }}
         run: |
           echo "cachekey=$(git submodule status firmware/pico-sdk | cut -d' ' -f 2)" >> $GITHUB_OUTPUT
+
       - name: Cache pico-sdk
         id: cache-pico-sdk
+        uses: actions/cache@v4
         with:
           path: firmware/pico-sdk
           key: firmware-pico-sdk-${{ steps.pico-sdk-cache-key.cache-key }}
