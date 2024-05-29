@@ -45,7 +45,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: firmware/pico-sdk
-          key: firmware-pico-sdk-${{ steps.pico-sdk-cache-key.cachekey }}
+          key: firmware-pico-sdk-${{ steps.pico-sdk-cache-key.outputs.cachekey }}
 
       - name: Get pico-sdk submodule
         if: steps.cache-pico-sdk.outputs.cache-hit != 'true'
