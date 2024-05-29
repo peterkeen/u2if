@@ -21,7 +21,7 @@ jobs:
       - id: flavorStep
         run: |
           FLAVORS=$(python3 ./firmware/build.py -flavors)
-          echo "flavors='$flavors'" >> $GITHUB_OUTPUT
+          echo "flavors='$FLAVORS'" >> $GITHUB_OUTPUT
           
   build_uf2:
     runs-on: ubuntu-latest
