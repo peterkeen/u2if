@@ -47,6 +47,8 @@ class WS2812B:
             buffer.append(pixel[2] & 0xFF)
             buffer.append(pixel[0] & 0xFF)
             buffer.append(pixel[1] & 0xFF)
+            if self.rgbw:
+                buffer.append(pixel[3] & 0xFF)
 
         remain_bytes = len(buffer)
         res = self._device.send_report(
