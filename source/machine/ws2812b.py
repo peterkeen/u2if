@@ -4,13 +4,18 @@ from . import u2if_const as report_const
 
 class WS2812B:
     def __init__(
-            self, pin_id, direction=None, pull=None, value=None, serial_number_str=None, rgbw=False
+            self, pin_id, direction=None, pull=None, value=None, serial_number_str=None, rgbw=False, color_order="GRB"
     ):
         self._initialized = False
         self._device = Device(serial_number_str=serial_number_str)
         self.pin_id = pin_id
         self.rgbw = rgbw
         self._initialized = self._init()
+        self._color_indexes = []
+
+        colors = "RGBW"
+        for i in range(len(color_order)):
+            self._color_indexes.append(colors.index(color_order[i]))
 
     def __del__(self):
         self.deinit()
@@ -18,9 +23,9 @@ class WS2812B:
     def _init(self):
         if self._initialized:
             return
-        chip_type = report_const.WS2812B_RGB
+        chip_type = 0
         if self.rgbw:
-            chip_type = report.const.WS2812B_RGBW
+            chip_type = 1
         res = self._device.send_report(bytes([report_const.WS2812B_INIT, self.pin_id, chip_type]))
         if res[1] != report_const.OK:
             raise RuntimeError("WS2812B init error.")
@@ -43,12 +48,11 @@ class WS2812B:
         # Not optimized version because buffer it is organized for PIO fifo and not for the transmission speed
         for pixel in pixel_list:
             # in uint32_t LSB order
-            buffer.append(0)
-            buffer.append(pixel[2] & 0xFF)
-            buffer.append(pixel[0] & 0xFF)
-            buffer.append(pixel[1] & 0xFF)
-            if self.rgbw:
-                buffer.append(pixel[3] & 0xFF)
+            if not self.rgbw:
+                buffer.append(0)
+
+            for index in reversed(self._color_indexes):
+                buffer.append(pixel[index] & 0xFF)
 
         remain_bytes = len(buffer)
         res = self._device.send_report(

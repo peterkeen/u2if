@@ -58,7 +58,7 @@ class HidWrapper:
         return None
 
     def read_hid(self, report_id):
-        f = self.executor.submit(self._read_hid, report, response)
+        f = self._executor.submit(self._read_hid, report_id)
         return f.result()
 
     def _read_hid(self, report_id):
