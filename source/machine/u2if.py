@@ -1,8 +1,6 @@
 import time
 import hid
 import serial
-import concurrent.futures
-
 from . import helper
 from . import u2if_const as report_const
 
@@ -20,72 +18,6 @@ COMPATIBLE_BOARD_PID_VID = [
     (0x1B4F, 0x0026),  # SparkFun Pro Micro RP2040
 ]
 
-class HidWrapper:
-    def __init__(self, vid, pid, serial_number):
-        self._hid = hid.Device(vid, pid, serial_number)
-        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-        self.serial = self._hid.serial
-
-    def read(self, size):
-        f = self._executor.submit(self._hid.read, size)
-        return f.result()
-
-    def write(self, data):
-        f = self._executor.submit(self._hid.write, data)
-        return f.result()
-
-
-    def close(self):
-        f = self._executor.submit(self._hid.close)
-        res = f.result()
-        self._executor.shutdown()
-
-    def send_report(self, report, response=True):
-        f = self._executor.submit(self._send_report, report, response)
-        return f.result()
-
-    def _send_report(self, report, response=True):
-        self._hid.write(
-            b"\0" + report + b"\0" * (report_const.HID_REPORT_SIZE - len(report))
-        )
-        if response:
-            res = self._read_hid(report[0])
-            if res[1] == report_const.NOT_CONCERNED:
-                raise RuntimeError(
-                    "Unknown command. Maybe the interface is not enabled in firmware."
-                )
-            return res
-        return None
-
-    def read_hid(self, report_id):
-        f = self._executor.submit(self._read_hid, report_id)
-        return f.result()
-
-    def _read_hid(self, report_id):
-        res = self._hid.read(report_const.HID_REPORT_SIZE)
-        while res[0] != report_id:
-            # self._report_events_list.append(res)
-            res = self._hid.read(report_const.HID_REPORT_SIZE)
-        return res
-
-
-class SerialWrapper:
-    def __init__(self, device):
-        self._serial = serial.Serial(device)
-        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-
-    def write(self, data):
-        f = self._executor.submit(self._serial.write, data)
-        return f.result()
-
-    def reset_output_buffer(self):
-        f = self._executor.submit(self._serial.reset_output_buffer)
-        return f.result()
-
-    def flush(self):
-        f = self._executor.submit(self._serial.flush)
-        return f.result()
-
 class Device(metaclass=helper.Singleton):
     def __init__(self, serial_number_str=None):
         self.vid, self.pid, self.serial_number = self._get_compatible_board_and_reset(
@@ -94,9 +26,9 @@ class Device(metaclass=helper.Singleton):
         if self.serial_number is None:
             raise ValueError("No board found")
         time.sleep(1)
-        self._hid = HidWrapper(self.vid, self.pid, self.serial_number)
+        self._hid = hid.Device(self.vid, self.pid, self.serial_number)
         device = helper.find_serial_port(self.vid, self.pid, self.serial_number)
-        self._serial = SerialWrapper(device)
+        self._serial = serial.Serial(device)
         self.firmware_version = self._get_firmware_version()
         # self._report_events_list = []
         self._irq_event_callbacks = {}
@@ -109,7 +41,7 @@ class Device(metaclass=helper.Singleton):
     def _get_compatible_board_and_reset(self, serial_number_str=None):
         for vid, pid in COMPATIBLE_BOARD_PID_VID:
             try:
-                self._hid = HidWrapper(vid, pid, serial_number_str)
+                self._hid = hid.Device(vid, pid, serial_number_str)
                 serial_number = self._hid.serial
                 self._reset()
                 self._hid.close()
@@ -125,10 +57,24 @@ class Device(metaclass=helper.Singleton):
         return self.firmware_version
 
     def send_report(self, report, response=True):
-        return self._hid.send_report(report, response)
+        self._hid.write(
+            b"\0" + report + b"\0" * (report_const.HID_REPORT_SIZE - len(report))
+        )
+        if response:
+            res = self.read_hid(report[0])
+            if res[1] == report_const.NOT_CONCERNED:
+                raise RuntimeError(
+                    "Unknown command. Maybe the interface is not enabled in firmware."
+                )
+            return res
+        return None
 
     def read_hid(self, report_id):
-        return self._hid.read_hid(report_id)
+        res = self._hid.read(report_const.HID_REPORT_SIZE)
+        while res[0] != report_id:
+            # self._report_events_list.append(res)
+            res = self._hid.read(report_const.HID_REPORT_SIZE)
+        return res
 
     def reset_output_serial(self):
         self._serial.reset_output_buffer()
@@ -160,15 +106,6 @@ class Device(metaclass=helper.Singleton):
     def unregister_callback(self, gpio):
         if gpio in self._irq_event_callbacks:
             del self._irq_event_callbacks[gpio]
-
-    # def _get_serial_number(self):
-    #     response = self.send_report(bytes([report_const.SYS_GET_SN]))
-    #     if response[1] != report_const.OK:
-    #         raise RuntimeError("Retrieve S/N error.")
-    #     sn = "0x"
-    #     for i in range(2,2+8):
-    #         sn += "{0:02X}".format(response[i])
-    #     return sn
 
     def _get_firmware_version(self):
         response = self.send_report(bytes([report_const.SYS_GET_VN]))
