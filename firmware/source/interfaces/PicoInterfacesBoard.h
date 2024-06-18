@@ -202,6 +202,14 @@ namespace Report {
         // | HUB75_WRITE | NB_BYTES[4] L.Endian (WIDTH * HEIGHT)| => First | HUB75_WRITE | CmdStatus::OK|NOK | 
         // ... and after the CDC stream (when transfer to led starting) | HUB75_WRITE | CmdStatus::OK |
         HUB75_WRITE = 0xD2,
+
+        // ONEWIRE: 0xEX
+        ONEWIRE_INIT = 0xE0,
+        ONEWIRE_DEINIT = 0xE1,
+        ONEWIRE_SEARCH = 0xE2,
+        ONEWIRE_SEND = 0xE3,
+        ONEWIRE_READ = 0xE4,
+        ONEWIRE_RESET = 0xE5,
     };
 }
 

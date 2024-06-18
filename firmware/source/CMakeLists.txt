@@ -64,6 +64,7 @@ add_executable(u2if
 pico_generate_pio_header(u2if ${CMAKE_CURRENT_LIST_DIR}/interfaces/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/interfaces/)
 pico_generate_pio_header(u2if ${CMAKE_CURRENT_LIST_DIR}/interfaces/audio_i2s.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/interfaces/)
 pico_generate_pio_header(u2if ${CMAKE_CURRENT_LIST_DIR}/interfaces/hub75.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/interfaces/)
+pico_generate_pio_header(u2if ${CMAKE_CURRENT_LIST_DIR}/interfaces/onewire.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/interfaces/)
 
 target_include_directories(u2if PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
