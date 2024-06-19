@@ -1,4 +1,5 @@
 #include "Hub75.h"
+#include "PioPrograms.h"
 #include "string.h"
 #include <algorithm>
 #include <math.h>
@@ -29,10 +30,8 @@ void hub75_core() {
 
     int ROWSEL_N_PINS = (int)log2(Hub75::HEIGHT >> 1);
 
-    uint data_prog_offs = pio_add_program(pio, &hub75_data_rgb888_program);
-    uint row_prog_offs = pio_add_program(pio, &hub75_row_program);
-    hub75_data_rgb888_program_init(pio, sm_data, data_prog_offs, DATA_BASE_PIN, CLK_PIN);
-    hub75_row_program_init(pio, sm_row, row_prog_offs, ROWSEL_BASE_PIN, ROWSEL_N_PINS, STROBE_PIN);
+    hub75_data_rgb888_program_init(pio, sm_data, PIO1_PROGRAM_HUB_75_RGB888_OFFSET, DATA_BASE_PIN, CLK_PIN);
+    hub75_row_program_init(pio, sm_row, PIO1_PROGRAM_HUB_75_ROW_OFFSET, ROWSEL_BASE_PIN, ROWSEL_N_PINS, STROBE_PIN);
 
     uint32_t currentIndex = 0;
     while (1) {
@@ -44,7 +43,7 @@ void hub75_core() {
             gc_row[0] = &img[rowsel * Hub75::WIDTH];
             gc_row[1] = &img[((1u << ROWSEL_N_PINS) + rowsel) * Hub75::WIDTH];
             for (int bit = 0; bit < 8; ++bit) {
-                hub75_data_rgb888_set_shift(pio, sm_data, data_prog_offs, bit);
+                hub75_data_rgb888_set_shift(pio, sm_data, PIO1_PROGRAM_HUB_75_RGB888_OFFSET, bit);
                 for (int x = 0; x < Hub75::WIDTH; ++x) {
                     pio_sm_put_blocking(pio, sm_data, gc_row[0][x]);
                     pio_sm_put_blocking(pio, sm_data, gc_row[1][x]);

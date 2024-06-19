@@ -1,4 +1,5 @@
 #include "I2s.h"
+#include "PioPrograms.h"
 
 #include <string.h>
 #include <algorithm>
@@ -87,10 +88,9 @@ CmdStatus I2s::init(uint8_t const *cmd) {
         return CmdStatus::NOK;
     }
     resetBuffers();
-    _offsetProgram = pio_add_program(_pio, &audio_i2s_program);
     const uint data_pin = U2IF_I2S_SD;
     const uint clock_pin_base = U2IF_I2S_CLK;
-    audio_i2s_program_init(_pio, _sm, _offsetProgram, data_pin, clock_pin_base);
+    audio_i2s_program_init(_pio, _sm, PIO1_PROGRAM_AUDIO_I2S_OFFSET, data_pin, clock_pin_base);
     update_pio_frequency(10000); // set default speed ?
     pio_sm_set_enabled(_pio, _sm, true);
 
@@ -109,9 +109,6 @@ CmdStatus I2s::deinit(uint8_t const *cmd) {
     dma_channel_wait_for_finish_blocking(_dmaChannel);
     pio_sm_set_enabled(_pio, _sm, false);
     resetBuffers();
-
-    pio_remove_program(_pio, &audio_i2s_program, _offsetProgram);
-
 
     setInterfaceState(InterfaceState::NOT_INITIALIZED);
     return CmdStatus::OK;

@@ -1,4 +1,5 @@
 #include "Ws2812b.h"
+#include "PioPrograms.h"
 
 #include <string.h>
 #include <algorithm>
@@ -8,7 +9,6 @@
 #include "ws2812.pio.h"
 
 static const PIO _pio = pio0;
-static const uint _sm = 0;
 static int _dmaChannel;
 static bool _dmaInProgress = false;
 
@@ -18,8 +18,8 @@ static void dma_handler() {
     dma_hw->ints0 = 1u << _dmaChannel;
 }
 
-Ws2812b::Ws2812b(uint maxLeds)
-    : StreamedInterface(maxLeds * 4 +1 /**/), _maxLeds(maxLeds), _internalState(INTERNAL_STATE::IDLE) {
+Ws2812b::Ws2812b(uint slot, uint maxLeds)
+  : StreamedInterface(maxLeds * 4 +1 /**/), _maxLeds(maxLeds), _internalState(INTERNAL_STATE::IDLE), _slot(slot) {
     initDma();
 }
 
@@ -28,6 +28,10 @@ Ws2812b::~Ws2812b() {
 
 CmdStatus Ws2812b::process(uint8_t const *cmd, uint8_t response[64]) {
     CmdStatus status = CmdStatus::NOT_CONCERNED;
+
+    if(cmd[1] != _slot) {
+      return status;
+    }
 
     if(cmd[0] == Report::ID::WS2812B_INIT) {
         status = init(cmd);
@@ -74,11 +78,10 @@ CmdStatus Ws2812b::init(uint8_t const *cmd) {
         return CmdStatus::NOK;
     }
 
-    _offsetProgram = pio_add_program(_pio, &ws2812_program);
-    const uint pinId = cmd[1];
-    const bool rgbw = cmd[2] == 1;
+    const uint pinId = cmd[2];
+    const bool rgbw = cmd[3] == 1;
 
-    ws2812_program_init(_pio, _sm, _offsetProgram, pinId, 800000, rgbw);
+    ws2812_program_init(_pio, _slot, PIO0_PROGRAM_WS2812_OFFSET, pinId, 800000, rgbw);
 
     setInterfaceState(InterfaceState::INTIALIZED);
     return CmdStatus::OK;
@@ -92,7 +95,7 @@ CmdStatus Ws2812b::deinit(uint8_t const *cmd) {
 
     dma_channel_abort(_dmaChannel);
     dma_channel_wait_for_finish_blocking(_dmaChannel);
-    pio_sm_set_enabled(_pio, _sm, false);
+    pio_sm_set_enabled(_pio, _slot, false);
     _dmaInProgress = false;
 
     pio_remove_program(_pio, &ws2812_program, _offsetProgram);
@@ -101,7 +104,7 @@ CmdStatus Ws2812b::deinit(uint8_t const *cmd) {
 }
 
 CmdStatus Ws2812b::write(uint8_t const *cmd, uint8_t response[64]) {
-    const uint32_t nbBytes = convertBytesToUInt32(&cmd[1]);
+    const uint32_t nbBytes = convertBytesToUInt32(&cmd[2]);
     response[2] = 0x00;
     if(_internalState != INTERNAL_STATE::IDLE){
         response[2] = 0x02;

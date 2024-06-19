@@ -56,6 +56,7 @@ add_executable(u2if
         main.cpp
         usb_descriptors.c
 	ModeActivity.cpp
+  PioPrograms.cpp
 	${InterfaceSources}
         )
 

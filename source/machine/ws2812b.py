@@ -4,10 +4,11 @@ from . import u2if_const as report_const
 
 class WS2812B:
     def __init__(
-            self, pin_id, direction=None, pull=None, value=None, serial_number_str=None, rgbw=False, color_order="GRB"
+            self, pin_id, slot=0, direction=None, pull=None, value=None, serial_number_str=None, rgbw=False, color_order="GRB"
     ):
         self._initialized = False
         self._device = Device(serial_number_str=serial_number_str)
+        self.slot = slot        
         self.pin_id = pin_id
         self.rgbw = rgbw
         self._initialized = self._init()
@@ -26,7 +27,7 @@ class WS2812B:
         chip_type = 0
         if self.rgbw:
             chip_type = 1
-        res = self._device.send_report(bytes([report_const.WS2812B_INIT, self.pin_id, chip_type]))
+        res = self._device.send_report(bytes([report_const.WS2812B_INIT, self.slot, self.pin_id, chip_type]))
         if res[1] != report_const.OK:
             raise RuntimeError("WS2812B init error.")
         return True
@@ -34,7 +35,7 @@ class WS2812B:
     def deinit(self):
         if not self._initialized:
             return
-        res = self._device.send_report(bytes([report_const.WS2812B_DEINIT]))
+        res = self._device.send_report(bytes([report_const.WS2812B_DEINIT, self.slot]))
         if res[1] != report_const.OK:
             raise RuntimeError("WS2812B deinit error.")
         self._initialized = False
@@ -56,7 +57,7 @@ class WS2812B:
 
         remain_bytes = len(buffer)
         res = self._device.send_report(
-            bytes([report_const.WS2812B_WRITE])
+            bytes([report_const.WS2812B_WRITE, self.slot])
             + remain_bytes.to_bytes(4, byteorder='little')
         )
         if res[1] != report_const.OK and res[2] == 0x01:

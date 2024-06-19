@@ -14,6 +14,7 @@ extern "C" {
 }
 #include "board_config.h"
 #include "ModeActivity.h"
+#include "PioPrograms.h"
 #include "interfaces/I2cMaster.h"
 #include "interfaces/SpiMaster.h"
 #include "interfaces/Gpio.h"
@@ -36,6 +37,7 @@ void sendSavedResponses();
 static ModeActivity modeActivity;
 // Interfaces
 static System sys;
+static PioPrograms pioPrograms;
 
 #if GPIO_ENABLED
 static Gpio gpio;
@@ -75,7 +77,8 @@ static Uart uart_1(1);
 #endif
 
 #if WS2812_ENABLED
-static Ws2812b ws2812b(WS2812_SIZE);
+static Ws2812b ws2812b_0(0, WS2812_SIZE);
+static Ws2812b ws2812b_1(1, WS2812_SIZE);
 #endif
 
 #if I2S_ENABLED
@@ -116,7 +119,8 @@ static std::vector<BaseInterface*> interfaces = {
 , &uart_1
 #endif
 #if WS2812_ENABLED
-, &ws2812b
+, &ws2812b_0
+, &ws2812b_1
 #endif
 #if I2S_ENABLED
 , &i2s
@@ -138,6 +142,7 @@ int main(void) {
     //stdio_init_all(); // to debug with printf (set pico_enable_stdio_uart(u2if 1) in CMakeLists) Caution, it is UART0.
 
     modeActivity.init();
+    pioPrograms.init();
 
     queue_init(&tx_report_queue, HID_RESPONSE_SIZE, TX_REPORT_QUEUE_SIZE);
     tusb_init();

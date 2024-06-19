@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 dirname=${PWD##*/} 
 if [ $dirname != "firmware" ]; then
   echo "This script has to be launched in the firmware directory"
