@@ -46,7 +46,7 @@ CmdStatus OneWire::init(uint8_t const *cmd) {
 
   const uint pinId = cmd[1];
 
-  onewire_program_init(_pio
+  //onewire_program_init(_pio
 
   return CmdStatus::NOT_CONCERNED;
 }
