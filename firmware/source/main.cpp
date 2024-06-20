@@ -22,10 +22,18 @@ extern "C" {
 #include "interfaces/Pwm.h"
 #include "interfaces/Adc.h"
 #include "interfaces/Uart.h"
+#if WS2812_ENABLED
 #include "interfaces/Ws2812b.h"
+#endif
+#if I2S_ENABLED
 #include "interfaces/I2s.h"
+#endif
+#if HUB75_ENABLED
 #include "interfaces/Hub75.h"
+#endif
+#if ONEWIRE_ENABLED
 #include "interfaces/OneWire.h"
+#endif
 #include "interfaces/GroupGpio.h"
 
 
