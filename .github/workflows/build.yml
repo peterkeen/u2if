@@ -92,7 +92,7 @@ jobs:
       - name: clone picotool
         run: git clone https://github.com/raspberrypi/picotool.git
       - name: build picotool
-        run: cd picotool && mkdir build && cd build && env PICO_SDK_PATH=../firmware/pico-sdk cmake .. && make && find .
+        run: cd picotool && mkdir build && cd build && env PICO_SDK_PATH=../../firmware/pico-sdk cmake .. && make && find .
 
   build_py:
     runs-on: ubuntu-latest
