@@ -89,7 +89,9 @@ static I2s i2s(4000, 5);
 static Hub75 hub75(HUB75_MAX_LEDS*4);
 #endif
 
+#if ONEWIRE_ENABLED
 static OneWire onewire;
+#endif
 
 static std::vector<BaseInterface*> interfaces = { 
 &gpio
@@ -128,7 +130,9 @@ static std::vector<BaseInterface*> interfaces = {
 #if HUB75_ENABLED
 , &hub75
 #endif
+#if ONEWIRE_ENABLED
 , &onewire
+#endif
 , &sys
 };
 
