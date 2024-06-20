@@ -97,7 +97,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: picotool
-          path: firmware/picotool/build/picotool
+          path: picotool/build/picotool
 
   build_py:
     runs-on: ubuntu-latest
