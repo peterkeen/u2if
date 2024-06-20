@@ -8,5 +8,6 @@ RUN pip install hidapi pyserial
 
 COPY *.uf2 /app/firmware
 COPY *.tar.gz /app
+COPY picotool /app
 
 RUN pip install /app/u2if-*.tar.gz

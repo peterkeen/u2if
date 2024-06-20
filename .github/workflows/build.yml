@@ -92,7 +92,12 @@ jobs:
       - name: clone picotool
         run: git clone https://github.com/raspberrypi/picotool.git
       - name: build picotool
-        run: cd picotool && mkdir build && cd build && env PICO_SDK_PATH=../../firmware/pico-sdk cmake .. && make && find .
+        run: cd picotool && mkdir build && cd build && env PICO_SDK_PATH=../../firmware/pico-sdk cmake .. && make
+      - name: Add Build Artifacts to CI Run
+        uses: actions/upload-artifact@v4
+        with:
+          name: picotool
+          path: firmware/picotool/build/picotool
 
   build_py:
     runs-on: ubuntu-latest
