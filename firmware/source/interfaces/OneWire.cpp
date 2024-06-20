@@ -1,3 +1,5 @@
+#if ONEWIRE_ENABLED
+
 #include "OneWire.h"
 
 #include "hardware/clocks.h"
@@ -78,3 +80,4 @@ CmdStatus OneWire::reset(uint8_t const *cmd) {
 
   return status;  
 }
+#endif
