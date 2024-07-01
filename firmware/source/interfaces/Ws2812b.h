@@ -28,12 +28,14 @@ protected:
     void initDma();
     void startTransfer(uint32_t *pixelBuf, uint32_t nbPixels);
 
+    bool dmaInProgress();
+
     uint _slot;
     uint32_t _maxLeds;
     uint _offsetProgram;
+    int _dmaChannel;
     INTERNAL_STATE _internalState;
 };
 
 
 #endif
-

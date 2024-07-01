@@ -9,14 +9,6 @@
 #include "ws2812.pio.h"
 
 static const PIO _pio = pio0;
-static int _dmaChannel;
-static bool _dmaInProgress = false;
-
-static void dma_handler() {
-    _dmaInProgress = false;
-    // Clear the interrupt request.
-    dma_hw->ints0 = 1u << _dmaChannel;
-}
 
 Ws2812b::Ws2812b(uint slot, uint maxLeds)
   : StreamedInterface(maxLeds * 4 +1 /**/), _maxLeds(maxLeds), _internalState(INTERNAL_STATE::IDLE), _slot(slot) {
@@ -58,9 +50,9 @@ CmdStatus Ws2812b::task(uint8_t response[64]) {
         // send ACK
         response[0] = Report::ID::WS2812B_WRITE;
         status = CmdStatus::OK;
-    } else if(_internalState == INTERNAL_STATE::TRANSFER_IN_PROGRESS && _dmaInProgress) {
+    } else if(_internalState == INTERNAL_STATE::TRANSFER_IN_PROGRESS && dmaInProgress()) {
         status = CmdStatus::NOT_FINISHED;
-    } else if(_internalState == INTERNAL_STATE::TRANSFER_IN_PROGRESS) { // !_dmaInProgress
+    } else if(_internalState == INTERNAL_STATE::TRANSFER_IN_PROGRESS) { // !dmaInProgress
         _internalState = INTERNAL_STATE::TRANSFER_FINISHED;
         status = CmdStatus::NOT_FINISHED;
     } else if(_internalState == INTERNAL_STATE::TRANSFER_FINISHED) {
@@ -96,9 +88,7 @@ CmdStatus Ws2812b::deinit(uint8_t const *cmd) {
     dma_channel_abort(_dmaChannel);
     dma_channel_wait_for_finish_blocking(_dmaChannel);
     pio_sm_set_enabled(_pio, _slot, false);
-    _dmaInProgress = false;
 
-    pio_remove_program(_pio, &ws2812_program, _offsetProgram);
     setInterfaceState(InterfaceState::NOT_INITIALIZED);
     return CmdStatus::OK;
 }
@@ -137,12 +127,16 @@ void Ws2812b::initDma() {
         );
 
     // Tell the DMA to raise IRQ line 0 when the channel finishes a block
-    dma_channel_set_irq0_enabled(_dmaChannel, true);
+    // dma_channel_set_irq0_enabled(_dmaChannel, true);
 
     // Configure the processor to run dma_handler() when DMA IRQ 0 is asserted
-    irq_set_exclusive_handler(DMA_IRQ_0, dma_handler);
+    // irq_set_exclusive_handler(DMA_IRQ_0, dma_handler);
     //irq_add_shared_handler(DMA_IRQ_0, dma_handler, 0); => if DMA ira0 is shared
-    irq_set_enabled(DMA_IRQ_0, true);
+    // irq_set_enabled(DMA_IRQ_0, true);
+}
+
+bool Ws2812b::dmaInProgress() {
+    return dma_channel_is_busy(_dmaChannel);
 }
 
 void Ws2812b::startTransfer(uint32_t *pixelBuf, uint32_t nbPixels) {
@@ -153,7 +147,6 @@ void Ws2812b::startTransfer(uint32_t *pixelBuf, uint32_t nbPixels) {
     _internalState = INTERNAL_STATE::TRANSFER_FINISHED;*/
 
     // Async version
-    _dmaInProgress = true;
     // Give the channel a new wave table entry to read from, and re-trigger it
     dma_channel_transfer_from_buffer_now(_dmaChannel, pixelBuf, nbPixels);
 }
