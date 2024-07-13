@@ -7,7 +7,7 @@
 
 class Ws2812b : public StreamedInterface {
 public:
-    Ws2812b(uint slot, uint maxLeds);
+    Ws2812b(uint maxLeds);
     virtual ~Ws2812b();
 
     CmdStatus process(uint8_t const *cmd, uint8_t response[64]);
@@ -30,9 +30,10 @@ protected:
 
     bool dmaInProgress();
 
-    uint _slot;
     uint32_t _maxLeds;
     uint _offsetProgram;
+    uint _sm;
+    uint _pin;
     int _dmaChannel;
     INTERNAL_STATE _internalState;
 };

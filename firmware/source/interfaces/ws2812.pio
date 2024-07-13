@@ -28,13 +28,9 @@ do_zero:
 % c-sdk {
 #include "hardware/clocks.h"
 
-static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, float freq, bool rgbw) {
-
-    pio_gpio_init(pio, pin);
-    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+static inline void ws2812_program_init(PIO pio, uint sm, uint offset, float freq, bool rgbw) {
 
     pio_sm_config c = ws2812_program_get_default_config(offset);
-    sm_config_set_sideset_pins(&c, pin);
     sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24);
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
@@ -44,6 +40,11 @@ static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, 
 
     pio_sm_init(pio, sm, offset, &c);
     pio_sm_set_enabled(pio, sm, true);
+}
+
+static inline void ws2812_program_set_pin(PIO pio, uint sm, uint pin) {
+    pio_gpio_init(pio, pin);
+    pio_sm_set_sideset_pins(pio, sm, pin);
 }
 %}
 

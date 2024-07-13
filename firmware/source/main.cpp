@@ -85,8 +85,7 @@ static Uart uart_1(1);
 #endif
 
 #if WS2812_ENABLED
-static Ws2812b ws2812b_0(0, WS2812_SIZE);
-static Ws2812b ws2812b_1(1, WS2812_SIZE);
+static Ws2812b ws2812b(WS2812_SIZE);
 #endif
 
 #if I2S_ENABLED
@@ -129,8 +128,7 @@ static std::vector<BaseInterface*> interfaces = {
 , &uart_1
 #endif
 #if WS2812_ENABLED
-, &ws2812b_0
-, &ws2812b_1
+, &ws2812b
 #endif
 #if I2S_ENABLED
 , &i2s

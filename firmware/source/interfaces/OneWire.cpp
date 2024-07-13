@@ -42,7 +42,7 @@ CmdStatus OneWire::task(uint8_t response[64]) {
 }
 
 CmdStatus OneWire::init(uint8_t const *cmd) {
-  if(getInterfaceState() == InterfaceState::INTIALIZED) {
+  if(getInterfaceState() == InterfaceState::INITIALIZED) {
     return CmdStatus::NOK;
   }
 

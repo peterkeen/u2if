@@ -114,7 +114,7 @@ CmdStatus Hub75::task(uint8_t response[64]) {
 // | HUB75_INIT | WIDTH | HEIGHT |
 CmdStatus Hub75::init(uint8_t const *cmd, uint8_t response[64]) {
     (void)response;
-    if(getInterfaceState() == InterfaceState::INTIALIZED) {
+    if(getInterfaceState() == InterfaceState::INITIALIZED) {
         return CmdStatus::NOK;
     }
 
@@ -132,7 +132,7 @@ CmdStatus Hub75::init(uint8_t const *cmd, uint8_t response[64]) {
     memset(_bufferRx2.getDataPtr8(), 0, Hub75::HEIGHT * Hub75::WIDTH * 4);
 
     multicore_launch_core1(hub75_core);
-    setInterfaceState(InterfaceState::INTIALIZED);
+    setInterfaceState(InterfaceState::INITIALIZED);
     return CmdStatus::OK;
 }
 

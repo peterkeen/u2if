@@ -9,7 +9,7 @@
 
 enum InterfaceState {
     NOT_INITIALIZED = 1,
-    INTIALIZED = 2
+    INITIALIZED = 2
 };
 
 class BaseInterface {

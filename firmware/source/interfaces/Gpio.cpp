@@ -86,7 +86,7 @@ bool debounceInput(repeating_timer_t *rt) {
 }
 
 Gpio::Gpio() {
-    setInterfaceState(InterfaceState::INTIALIZED);
+    setInterfaceState(InterfaceState::INITIALIZED);
     critical_section_init(&critSec);
     add_repeating_timer_us(-DEBOUNCE_PERIODS_MS * 1000, debounceInput, NULL, &_debounceTimer);
 }

@@ -9,7 +9,7 @@
 #include "hardware/clocks.h"
 
 Pwm::Pwm() {
-    setInterfaceState(InterfaceState::INTIALIZED);
+    setInterfaceState(InterfaceState::INITIALIZED);
 }
 
 Pwm::~Pwm() {

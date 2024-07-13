@@ -2,7 +2,7 @@
 #include "hardware/adc.h"
 
 Adc::Adc() {
-    setInterfaceState(InterfaceState::INTIALIZED);
+    setInterfaceState(InterfaceState::INITIALIZED);
     adc_init();
 }
 

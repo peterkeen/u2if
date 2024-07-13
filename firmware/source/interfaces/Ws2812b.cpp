@@ -10,8 +10,8 @@
 
 static const PIO _pio = pio0;
 
-Ws2812b::Ws2812b(uint slot, uint maxLeds)
-  : StreamedInterface(maxLeds * 4 +1 /**/), _maxLeds(maxLeds), _internalState(INTERNAL_STATE::IDLE), _slot(slot) {
+Ws2812b::Ws2812b(uint maxLeds)
+  : StreamedInterface(maxLeds * 4 +1 /**/), _maxLeds(maxLeds), _internalState(INTERNAL_STATE::IDLE), _sm(0), _pin(0) {
     initDma();
 }
 
@@ -20,10 +20,6 @@ Ws2812b::~Ws2812b() {
 
 CmdStatus Ws2812b::process(uint8_t const *cmd, uint8_t response[64]) {
     CmdStatus status = CmdStatus::NOT_CONCERNED;
-
-    if(cmd[1] != _slot) {
-      return status;
-    }
 
     if(cmd[0] == Report::ID::WS2812B_INIT) {
         status = init(cmd);
@@ -66,16 +62,17 @@ CmdStatus Ws2812b::task(uint8_t response[64]) {
 
 
 CmdStatus Ws2812b::init(uint8_t const *cmd) {
-    if(getInterfaceState() == InterfaceState::INTIALIZED) {
-        return CmdStatus::NOK;
+    if(getInterfaceState() == InterfaceState::INITIALIZED) {
+        return CmdStatus::OK;
     }
 
-    const uint pinId = cmd[2];
-    const bool rgbw = cmd[3] == 1;
+    const bool rgbw = cmd[1] == 1;
 
-    ws2812_program_init(_pio, _slot, PIO0_PROGRAM_WS2812_OFFSET, pinId, 800000, rgbw);
+    _sm = pio_claim_unused_sm(_pio, true);
 
-    setInterfaceState(InterfaceState::INTIALIZED);
+    ws2812_program_init(_pio, _sm, PIO0_PROGRAM_WS2812_OFFSET, 800000, rgbw);
+
+    setInterfaceState(InterfaceState::INITIALIZED);
     return CmdStatus::OK;
 }
 
@@ -87,13 +84,15 @@ CmdStatus Ws2812b::deinit(uint8_t const *cmd) {
 
     dma_channel_abort(_dmaChannel);
     dma_channel_wait_for_finish_blocking(_dmaChannel);
-    pio_sm_set_enabled(_pio, _slot, false);
+    pio_sm_set_enabled(_pio, _sm, false);
 
     setInterfaceState(InterfaceState::NOT_INITIALIZED);
     return CmdStatus::OK;
 }
 
 CmdStatus Ws2812b::write(uint8_t const *cmd, uint8_t response[64]) {
+    ws2812_program_set_pin(_pio, _sm, cmd[1]);
+
     const uint32_t nbBytes = convertBytesToUInt32(&cmd[2]);
     response[2] = 0x00;
     if(_internalState != INTERNAL_STATE::IDLE){
@@ -125,14 +124,6 @@ void Ws2812b::initDma() {
             0,              // Write the same value many times, then halt and interrupt
             false           // Don't start yet
         );
-
-    // Tell the DMA to raise IRQ line 0 when the channel finishes a block
-    // dma_channel_set_irq0_enabled(_dmaChannel, true);
-
-    // Configure the processor to run dma_handler() when DMA IRQ 0 is asserted
-    // irq_set_exclusive_handler(DMA_IRQ_0, dma_handler);
-    //irq_add_shared_handler(DMA_IRQ_0, dma_handler, 0); => if DMA ira0 is shared
-    // irq_set_enabled(DMA_IRQ_0, true);
 }
 
 bool Ws2812b::dmaInProgress() {
@@ -140,13 +131,5 @@ bool Ws2812b::dmaInProgress() {
 }
 
 void Ws2812b::startTransfer(uint32_t *pixelBuf, uint32_t nbPixels) {
-    // sync version
-    /*for(uint32_t pxIt=0; pxIt < nbPixels; pxIt++) {
-        pio_sm_put_blocking(_pio, 0, pixelBuf[pxIt]);
-    }
-    _internalState = INTERNAL_STATE::TRANSFER_FINISHED;*/
-
-    // Async version
-    // Give the channel a new wave table entry to read from, and re-trigger it
     dma_channel_transfer_from_buffer_now(_dmaChannel, pixelBuf, nbPixels);
 }

@@ -86,7 +86,7 @@ CmdStatus SPIMaster::init(uint8_t const *cmd) {
     gpio_set_function(_mosiGP, GPIO_FUNC_SPI);
     gpio_set_function(_misoGP, GPIO_FUNC_SPI);
 
-    setInterfaceState(InterfaceState::INTIALIZED);
+    setInterfaceState(InterfaceState::INITIALIZED);
     return CmdStatus::OK;
 }
 

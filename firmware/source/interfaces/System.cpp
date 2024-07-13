@@ -5,7 +5,7 @@
 
 System::System()
  : _needReset(false), count(0){
-    setInterfaceState(InterfaceState::INTIALIZED);
+    setInterfaceState(InterfaceState::INITIALIZED);
 }
 
 System::~System() {

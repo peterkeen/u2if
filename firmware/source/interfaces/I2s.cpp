@@ -84,7 +84,7 @@ CmdStatus I2s::task(uint8_t response[64]) {
 
 CmdStatus I2s::init(uint8_t const *cmd) {
     (void)cmd;
-    if(getInterfaceState() == InterfaceState::INTIALIZED) {
+    if(getInterfaceState() == InterfaceState::INITIALIZED) {
         return CmdStatus::NOK;
     }
     resetBuffers();
@@ -94,7 +94,7 @@ CmdStatus I2s::init(uint8_t const *cmd) {
     update_pio_frequency(10000); // set default speed ?
     pio_sm_set_enabled(_pio, _sm, true);
 
-    setInterfaceState(InterfaceState::INTIALIZED);
+    setInterfaceState(InterfaceState::INITIALIZED);
     return CmdStatus::OK;
 }
 
@@ -115,7 +115,7 @@ CmdStatus I2s::deinit(uint8_t const *cmd) {
 }
 
 CmdStatus I2s::setFreq(uint8_t const *cmd) {
-    if(getInterfaceState() != InterfaceState::INTIALIZED) {
+    if(getInterfaceState() != InterfaceState::INITIALIZED) {
         return CmdStatus::NOK;
     }
     const uint32_t freq = convertBytesToUInt32(&cmd[1]);

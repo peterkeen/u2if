@@ -42,7 +42,7 @@ CmdStatus Uart::task(uint8_t response[64]) {
     (void)response;
     CmdStatus status = CmdStatus::NOT_CONCERNED;
 
-    if(getInterfaceState() == InterfaceState::INTIALIZED && uart_is_readable(_uartInst)) {
+    if(getInterfaceState() == InterfaceState::INITIALIZED && uart_is_readable(_uartInst)) {
         status = CmdStatus::NOT_FINISHED;
         uint count = std::min(RX_REPORT_QUEUE_SIZE - queue_get_level(&_rxUartQueue), 200u );
         while(uart_is_readable(_uartInst) && count>0) {
@@ -60,7 +60,7 @@ CmdStatus Uart::init(uint8_t const *cmd) {
     uart_init(_uartInst, baudrate);
     gpio_set_function(_txGP, GPIO_FUNC_UART);
     gpio_set_function(_rxGP, GPIO_FUNC_UART);
-    setInterfaceState(InterfaceState::INTIALIZED);
+    setInterfaceState(InterfaceState::INITIALIZED);
     return CmdStatus::OK;
 }
 

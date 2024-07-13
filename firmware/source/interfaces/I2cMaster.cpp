@@ -94,7 +94,7 @@ CmdStatus I2CMaster::init(uint8_t const *cmd) {
         gpio_pull_up(_sdaGP);
         gpio_pull_up(_sclGP);
     }
-    setInterfaceState(InterfaceState::INTIALIZED);
+    setInterfaceState(InterfaceState::INITIALIZED);
     return CmdStatus::OK;
 }
 

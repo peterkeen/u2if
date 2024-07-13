@@ -3,7 +3,7 @@
 
 
 GroupGpio::GroupGpio() {
-    setInterfaceState(InterfaceState::INTIALIZED);
+    setInterfaceState(InterfaceState::INITIALIZED);
 }
 
 GroupGpio::~GroupGpio() {
